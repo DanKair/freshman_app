@@ -1,0 +1,23 @@
+# Database files
+**/freshman_app/db.sqlite3
+*/db.sqlite3
+
+# Media uploads
+**/freshman_app/media/
+**/media/
+
+# Virtual environments
+**/.venv/
+**/venv/
+
+# IDE settings
+.idea/
+.vscode/
+
+# Environment variables
+.env
+
+# Compiled Python files
+__pycache__/
+**/__pycache__/
+**.pyc
