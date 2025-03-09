@@ -1,3 +1,5 @@
+from tkinter.constants import CASCADE
+
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -9,6 +11,7 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError('The Email field must be set')
         email = self.normalize_email(email)
+        extra_fields.setdefault("username", email.split("@")[0])  # Default username from email
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -29,20 +32,54 @@ class User(AbstractUser):
         ("mentor", "Mentor"),
         ("admin", "Admin")
     ]
-    username = None
+    username = models.CharField(max_length=100, unique=True)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=25, blank=False)
     last_name = models.CharField(max_length=25, blank=False)
     phone_number = models.CharField(max_length=15, unique=True)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='applicant')
-    is_verified = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ["first_name", "last_name", "role", "phone_number"]
+    REQUIRED_FIELDS = ["username", "first_name", "last_name", "role", "phone_number"]
 
     objects = UserManager()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} with role: {self.role}"
+        return f"{self.username} with role: {self.role}"
+
+
+class ApplicantProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="applicant_profile")
+    high_school = models.CharField(max_length=255)
+    gpa = models.DecimalField(max_digits=5, decimal_places=2)
+    intended_major = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.user.name} from {self.high_school} with GPA: {self.gpa}"
+
+
+class MentorProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor_profile')
+    specialization = models.CharField(max_length=100)
+    faculty = models.CharField(max_length=100, verbose_name="Факультет")
+    expertise = models.TextField(help_text="Subjects or areas they mentor in")
+
+    def __str__(self):
+        return f"{self.user.name} - {self.faculty} - {self.expertise}"
+
+
+class FreshmanProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="freshman_profile")
+    major = models.CharField(max_length=255)
+    year_of_study = models.IntegerField()
+    dorm_room = models.CharField(max_length=50, blank=True, null=True)
+    enrolled_courses = models.TextField(blank=True, help_text="List of courses enrolled in")
+
+    def __str__(self):
+        return f"{self.user.name} - {self.major}"
+
+
+
+
 
 

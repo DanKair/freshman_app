@@ -1,33 +1,64 @@
-from django.shortcuts import render
+from django.contrib.auth import authenticate, login
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserSerializer, UserRegisterSerializer, UserLoginSerializer
 
-from .serializers import UserSerializer, UserRegisterSerializer
+from .models import User
 
 # Create your views here.
-class UserRegisterAPIView(GenericAPIView):
+# General Register for User model
+class UserRegisterView(GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = UserRegisterSerializer
 
-    # After passing the data, user gets his refresh / access tokens
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        token = RefreshToken.for_user(user)
         data = serializer.data
-        data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
         return Response(data, status=status.HTTP_201_CREATED)
 
 
-"""class UserRegisterView(APIView):
+class UserLoginView(GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = UserLoginSerializer
+
     def post(self, request):
-        serializer = UserSerializer
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+
+"""class UserLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        user = authenticate(request, email=email, password=password)
+
+        if user is None:
+            return Response({"Error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+        login(request,user)
+        msg = {"message": "Login is successful, session created"}
+        return Response(msg)"""
+
+
+@api_view(["GET"])
+def get_users(request):
+    user = User.objects.all()
+    serializer = UserSerializer(user, many=True)
+
+    return Response(serializer.data)
+
+
+
+
+
+
+
