@@ -26,10 +26,14 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractUser):
+    FRESHMAN = 'freshman'
+    MENTOR = 'mentor'
+    APPLICANT = 'applicant'
+
     ROLE_CHOICES = [
-        ("applicant", "Applicant"),
-        ("freshman", "Freshman"),
-        ("mentor", "Mentor"),
+        (APPLICANT, "Applicant"),
+        (FRESHMAN, "Freshman"),
+        (MENTOR, "Mentor"),
         ("admin", "Admin")
     ]
     username = models.CharField(max_length=100, unique=True)
@@ -37,7 +41,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=25, blank=False)
     last_name = models.CharField(max_length=25, blank=False)
     phone_number = models.CharField(max_length=15, unique=True)
-    role = models.CharField(max_length=15, choices=ROLE_CHOICES, default='applicant')
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ["username", "first_name", "last_name", "role", "phone_number"]
@@ -55,28 +59,27 @@ class ApplicantProfile(models.Model):
     intended_major = models.CharField(max_length=100)
 
     def __str__(self):
-        return f"{self.user.name} from {self.high_school} with GPA: {self.gpa}"
+        return f"{self.user} from {self.high_school} with GPA: {self.gpa}"
 
 
 class MentorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor_profile')
-    specialization = models.CharField(max_length=100)
+    year_of_study = models.IntegerField()
     faculty = models.CharField(max_length=100, verbose_name="Факультет")
-    expertise = models.TextField(help_text="Subjects or areas they mentor in")
+    expertise_subject = models.TextField(help_text="Subjects or areas they mentor in")
+    is_available = models.BooleanField()
 
     def __str__(self):
-        return f"{self.user.name} - {self.faculty} - {self.expertise}"
+        return f"{self.user} - {self.faculty} - {self.expertise_subject}"
 
 
 class FreshmanProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="freshman_profile")
     major = models.CharField(max_length=255)
-    year_of_study = models.IntegerField()
-    dorm_room = models.CharField(max_length=50, blank=True, null=True)
     enrolled_courses = models.TextField(blank=True, help_text="List of courses enrolled in")
 
     def __str__(self):
-        return f"{self.user.name} - {self.major}"
+        return f"{self.user} - {self.major}"
 
 
 
