@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate, login, logout
 from rest_framework.exceptions import ValidationError
-from .models import FreshmanProfile, MentorProfile, ApplicantProfile
-
+from django.apps import apps
 
 User = get_user_model()
 
@@ -13,7 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', "phone_number", 'role' ]
         read_only_fields = ('email', 'first_name', 'last_name')
-
 
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,6 +38,21 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise ValidationError("this email can't be accepted")
 
         return data
+
+    """
+    This line of code responsible for UserProfile Management
+    I was lazy to create seperate UserProfile Serializer to handle this 
+    That's why I just added method to already existing Serializer with same attributes :P
+    """
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -99,8 +112,8 @@ class ComplexRegisterSerializer(serializers.ModelSerializer):
             if not data.get('expertise_subject') or not data.get('year_of_study'):
                 raise serializers.ValidationError("Mentors must provide expertise and year of study.")
         elif role == 'applicant':
-            if not data.get('high_school') or not data.get('gpa'):
-                raise serializers.ValidationError("Applicants must provide high school name and GPA.")
+            if not data.get('high_school') or not data.get('gpa') or not data.get('intended_major'):
+                raise serializers.ValidationError("Applicants must provide high school name, GPA and intended major.")
         elif role == 'freshman':
             if not data.get('major'):
                 raise serializers.ValidationError("Freshmen must provide major.")
@@ -120,28 +133,18 @@ class ComplexRegisterSerializer(serializers.ModelSerializer):
 
         # Create corresponding profile
         if role == 'mentor':
+            # This import was made to fix circular import issue
+            MentorProfile = apps.get_model('profiles', 'MentorProfile')
             MentorProfile.objects.create(user=user, **mentor_data)
         elif role == 'applicant':
+            # This import was made to fix circular import issue
+            ApplicantProfile = apps.get_model('profiles', 'ApplicantProfile')
             ApplicantProfile.objects.create(user=user, **applicant_data)
         elif role == 'freshman':
+            # This import was made to fix circular import issue
+            FreshmanProfile = apps.get_model('profiles', 'FreshmanProfile')
             FreshmanProfile.objects.create(user=user, **freshman_data)
 
         return user
 
-
-class FreshmanSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FreshmanProfile
-        fields = ['user', 'major', 'enrolled_courses']
-
-
-class MentorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MentorProfile
-        fields = '__all__'
-
-class ApplicantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ApplicantProfile
-        fields = '__all__'
 
