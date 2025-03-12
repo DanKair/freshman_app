@@ -6,7 +6,6 @@ python-dotenv
 django
 django-cors-headers
 djangorestframework
-djangorestframework-simplejwt
 drf_yasg # documentation
 
 # DB related
