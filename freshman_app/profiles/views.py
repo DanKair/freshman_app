@@ -3,12 +3,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import MentorProfile, FreshmanProfile, ApplicantProfile
-from .serializers import MentorSerializer, ApplicantSerializer, FreshmanSerializer
+from .serializers import MentorProfileSerializer, ApplicantProfileSerializer, FreshmanProfileSerializer
 from .permissions import IsFreshman, IsMentor, IsApplicant
 # Profile Management system based on roles
 
 class MentorProfileView(GenericAPIView):
-    serializer_class = MentorSerializer
+    serializer_class = MentorProfileSerializer
     permission_classes = [IsMentor]
 
     def get(self, request):
@@ -37,7 +37,7 @@ class MentorProfileView(GenericAPIView):
 
 class ApplicantProfileView(GenericAPIView):
     permission_classes = [IsApplicant]
-    serializer_class = ApplicantSerializer
+    serializer_class = ApplicantProfileSerializer
 
     def get(self, request):
         """Get the authenticated user's applicant profile"""
@@ -64,7 +64,7 @@ class ApplicantProfileView(GenericAPIView):
 
 class FreshmanProfileView(GenericAPIView):
     permission_classes = [IsFreshman]
-    serializer_class = FreshmanSerializer
+    serializer_class = FreshmanProfileSerializer
     def get(self, request):
         """Get the authenticated user's freshman profile"""
         if not hasattr(request.user, 'freshman_profile'):
@@ -93,20 +93,28 @@ class FreshmanProfileView(GenericAPIView):
 # Test views
 class FreshmenListAPIView(APIView):
     def get(self, request):
-        user = FreshmanProfile.objects.all()
-        serializer = FreshmanSerializer(user, many=True)
+        freshman = FreshmanProfile.objects.all()
+        serializer = FreshmanProfileSerializer(freshman, many=True)
         return Response(serializer.data)
 
 class MentorListAPIView(APIView):
     def get(self, request):
-        user = MentorProfile.objects.all()
-        serializer = MentorSerializer(user, many=True)
+        mentor = MentorProfile.objects.all()
+        serializer = MentorProfileSerializer(mentor, many=True)
         return Response(serializer.data)
 
 class ApplicantListAPIView(APIView):
     def get(self, request):
-        user = ApplicantProfile.objects.all()
-        serializer = ApplicantSerializer(user, many=True)
+        applicant = ApplicantProfile.objects.all()
+        serializer = ApplicantProfileSerializer(applicant, many=True)
+        return Response(serializer.data)
+
+
+
+class GetMentorProfileView(APIView):
+    def get(self, request, pk):
+        mentor = MentorProfile.objects.get(id=pk)
+        serializer = MentorProfileSerializer(mentor)
         return Response(serializer.data)
 
 

@@ -70,7 +70,7 @@ class UserLoginSerializer(serializers.Serializer):
 
         login(request, user)
 
-        return({"message": "Login succesfully completed!"})
+        return({"message": "Login succesfully completed✔!"})
 
 
 class LogoutSerializer(serializers.Serializer):
@@ -86,6 +86,7 @@ class ComplexRegisterSerializer(serializers.ModelSerializer):
 
     # Role-specific fields (optional at first)
     expertise_subject = serializers.CharField(required=False) #mentor related
+    experience_years = serializers.IntegerField(required=False)
     year_of_study = serializers.IntegerField(required=False)
     faculty = serializers.CharField(required=False)
     is_available = serializers.BooleanField(required=False)
@@ -100,7 +101,7 @@ class ComplexRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password', 'first_name', 'last_name', 'phone_number', 'role',
-                  'expertise_subject', 'year_of_study', 'is_available', 'faculty',
+                  'expertise_subject', 'year_of_study', 'is_available', 'faculty', 'experience_years',
                   'major', 'enrolled_courses', 'high_school', 'gpa', 'intended_major']
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -124,7 +125,7 @@ class ComplexRegisterSerializer(serializers.ModelSerializer):
         role = validated_data.pop('role')
 
         # Extract profile-related data
-        mentor_data = {k: validated_data.pop(k) for k in ['expertise_subject', 'year_of_study', 'is_available', 'faculty'] if k in validated_data}
+        mentor_data = {k: validated_data.pop(k) for k in ['expertise_subject', 'experience_years', 'year_of_study', 'is_available', 'faculty'] if k in validated_data}
         applicant_data = {k: validated_data.pop(k) for k in ['high_school', 'gpa', 'intended_major'] if k in validated_data}
         freshman_data = {k: validated_data.pop(k) for k in ['enrolled_courses', 'major'] if k in validated_data}
 

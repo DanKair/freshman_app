@@ -21,8 +21,7 @@ class UserRegisterView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        data = serializer.data
-        return Response(data, status=status.HTTP_201_CREATED)
+        return Response({"message": f"Welcome {user.role}, you have signed up successfully!!"}, status=status.HTTP_201_CREATED)
 
 
 class UserLoginView(GenericAPIView):
@@ -41,8 +40,8 @@ class ComplexRegisterView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+            return Response({"message": f"Welcome {user.username}, you have signed up successfully✨!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

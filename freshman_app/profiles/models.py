@@ -23,6 +23,7 @@ class MentorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor_profile')
     year_of_study = models.IntegerField()
     faculty = models.CharField(max_length=100, verbose_name="Факультет")
+    experience_years = models.PositiveIntegerField()
     expertise_subject = models.TextField(help_text="Subjects or areas they mentor in")
     is_available = models.BooleanField()
 
@@ -37,6 +38,7 @@ class FreshmanProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="freshman_profile")
     major = models.CharField(max_length=255)
     enrolled_courses = models.TextField(blank=True, help_text="List of courses enrolled in")
+    mentor = models.ForeignKey(MentorProfile, null=True, blank=True, on_delete=models.SET_NULL)
 
 
     def __str__(self):

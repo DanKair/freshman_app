@@ -7,8 +7,7 @@ from .serializers import FriendRequestSerializer, FriendshipSerializer
 from django.shortcuts import get_object_or_404
 
 from profiles.models import FreshmanProfile, ApplicantProfile
-from profiles.serializers import FreshmanSerializer, ApplicantSerializer
-
+from profiles.serializers import FreshmanProfileSerializer, ApplicantProfileSerializer \
 
 
 class SendFriendRequestView(APIView):
@@ -72,8 +71,8 @@ class FindFriendsByInterestView(APIView):
 
         # Combine results
         results = {
-            "freshmen": FreshmanSerializer(freshman_matches, many=True).data,
-            "applicants": ApplicantSerializer(applicant_matches, many=True).data,
+            "freshmen": FreshmanProfileSerializer(freshman_matches, many=True).data,
+            "applicants": ApplicantProfileSerializer(applicant_matches, many=True).data,
         }
         return Response(results, status=200)
 
