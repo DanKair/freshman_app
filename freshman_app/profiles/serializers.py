@@ -5,7 +5,7 @@ class FreshmanSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True) # to see username instead of id
     class Meta:
         model = FreshmanProfile
-        fields = ['user', 'major', 'enrolled_courses']
+        fields = ['user', 'major', 'enrolled_courses', 'interests']
 
 
 

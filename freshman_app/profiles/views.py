@@ -103,4 +103,10 @@ class MentorListAPIView(APIView):
         serializer = MentorSerializer(user, many=True)
         return Response(serializer.data)
 
+class ApplicantListAPIView(APIView):
+    def get(self, request):
+        user = ApplicantProfile.objects.all()
+        serializer = ApplicantSerializer(user, many=True)
+        return Response(serializer.data)
+
 
