@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'profiles',
     'friendship',
     'mentorship',
+    'events',
     # libraries
     'rest_framework',
     'drf_yasg',

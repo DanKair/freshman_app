@@ -18,8 +18,13 @@ class SendFriendRequestView(APIView):
         if not receiver_id:
             return Response({"error": "Receiver ID is required"}, status=400)
 
+        if receiver_id == request.user.id:
+            return Response({"error": "You cannot send a request to yourself"}, status=400)
+
         if FriendRequest.objects.filter(sender=request.user, receiver_id=receiver_id).exists():
             return Response({"error": "Friend request already sent"}, status=400)
+
+
 
         friend_request = FriendRequest.objects.create(sender=request.user, receiver_id=receiver_id)
         return Response(FriendRequestSerializer(friend_request).data, status=201)
@@ -73,6 +78,23 @@ class FindFriendsByInterestView(APIView):
         results = {
             "freshmen": FreshmanProfileSerializer(freshman_matches, many=True).data,
             "applicants": ApplicantProfileSerializer(applicant_matches, many=True).data,
+        }
+        return Response(results, status=200)
+
+class FindFriendsByMajorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        interest_query = request.query_params.get("major", "").strip().lower()
+        if not interest_query:
+            return Response({"error": "Interest query is required"}, status=400)
+
+        # Search in FreshmanProfiles
+        freshman_matches = FreshmanProfile.objects.filter(major__icontains=interest_query)
+
+        # results
+        results = {
+            "freshmen": FreshmanProfileSerializer(freshman_matches, many=True).data
         }
         return Response(results, status=200)
 

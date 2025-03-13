@@ -46,6 +46,14 @@ class RespondMentorshipRequestView(APIView):
         return Response(MentorshipRequestSerializer(mentorship_request).data, status=200)
 
 
+class ListMentorsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        mentors = MentorProfile.objects.filter(availability=True)
+        return Response(MentorProfileSerializer(mentors, many=True).data)
+
+
 class SearchMentorsView(APIView):
     permission_classes = [IsFreshman]
 
@@ -74,3 +82,14 @@ class AssignMentorView(APIView):
 
         return Response({"message": "Mentor assigned successfully!"})
 
+
+class ViewMentorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        mentorship = Mentorship.objects.filter(mentee=request.user, status="accepted").first()
+
+        if not mentorship:
+            return Response({"error": "No mentor assigned"}, status=404)
+
+        return Response(MentorProfileSerializer(mentorship.mentor).data)
