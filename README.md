@@ -13,7 +13,7 @@
 ## Installation & Get Started
 ### 1. Cloning the Repository
 ```
-https://github.com/DanKair/freshman_app_hackathon.git
+git clone https://github.com/DanKair/freshman_app_hackathon.git
 cd freshamn_app
 ```
 ### 2. Installation of dependencies
